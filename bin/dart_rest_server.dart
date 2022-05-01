@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'database_manager.dart';
-import 'server.dart';
+import 'server_wrapper.dart';
 
 void main(List<String> arguments) async {
   Server server = Server();
