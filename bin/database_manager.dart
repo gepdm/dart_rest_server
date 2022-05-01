@@ -21,7 +21,7 @@ class Database {
         "hashed_password VARCHAR(1024), "
         "salt VARCHAR(32), "
         "PRIMARY KEY (user_id));");
-    await _conn.query("CREATE TABLE IF NOT EXISTS address ("
+    await _conn.query("CREATE TABLE IF NOT EXISTS addresses ("
         "address_id INT UNIQUE NOT NULL AUTO_INCREMENT, "
         "user_id INT UNIQUE NOT NULL, "
         "rua VARCHAR(255) NOT NULL, "
