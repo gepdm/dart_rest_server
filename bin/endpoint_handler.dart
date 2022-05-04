@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:mysql1/mysql1.dart';
+import 'package:mysql_client/mysql_client.dart';
 
 import 'database_manager.dart';
 
@@ -20,10 +20,10 @@ void handleFoodList(HttpRequest req) async {
   HttpResponse res = req.response;
   res.headers.contentType = ContentType.json;
   res.statusCode = HttpStatus.ok;
-  Results foods = await Database.queryFoods();
+  IResultSet foods = await Database.queryFoods();
   List<Map<String, dynamic>> foodMap = [];
-  for (var row in foods) {
-    foodMap.add({"Name": row[1], "Price": row[2]});
+  for (var row in foods.rows) {
+    foodMap.add({"Name": row.colAt(0), "Price": row.colAt(1)});
   }
   res.write(_encoder.convert(foodMap));
   res.close();
