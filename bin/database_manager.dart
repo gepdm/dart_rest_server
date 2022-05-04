@@ -74,4 +74,29 @@ class Database {
       return AuthResult.wrongCredentials;
     }
   }
+
+  static Future<AuthResult> registerUser(
+      String email, String username, String password, String salt) async {
+    IResultSet alreadyRegistered = await _conn.execute(
+        "SELECT email, username FROM users "
+        "WHERE email = :email OR username = :username;",
+        {"email": email, "username": username});
+
+    if (alreadyRegistered.rows.isEmpty) {
+      await _conn.execute(
+          "INSERT INTO users (email, username, hashed_password, salt) "
+          "VALUES (:email, :username, :hashed_password, :salt);",
+          {
+            "email": email,
+            "username": username,
+            "hashed_password": password,
+            "salt": salt
+          });
+      return AuthResult.registrationOk;
+    } else if (alreadyRegistered.rows.first.colAt(0) == email) {
+      return AuthResult.emailInUse;
+    } else {
+      return AuthResult.usernameInUse;
+    }
+  }
 }
