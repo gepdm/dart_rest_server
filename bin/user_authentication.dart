@@ -23,7 +23,7 @@ class Auth {
     return result;
   }
 
-  static Future<AuthResult> registerUser(
+  static Future<AuthResult> authRegisterUser(
       String email, String username, String password) async {
     // const String salt = generateSalt();
     // const String hashedPassword = hashPassword(password, salt);
