@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:shelf_router/shelf_router.dart';
-import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
 import 'endpoint_handler.dart';
@@ -19,5 +16,6 @@ class Server {
   void setEndpoints(Router router) {
     router.get("/api/public/foods", handleFoodList);
     router.post("/api/register", handleRegister);
+    router.post("/api/private/order", handleCreateOrder);
   }
 }

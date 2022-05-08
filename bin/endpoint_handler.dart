@@ -5,6 +5,7 @@ import 'package:mysql_client/mysql_client.dart';
 import 'package:shelf/shelf.dart';
 
 import 'database_manager.dart';
+import 'order.dart';
 import 'user_authentication.dart';
 
 const _encoder = JsonEncoder.withIndent('  ');
@@ -22,10 +23,31 @@ Future<Response> handleFoodList(Request req) async {
   IResultSet foods = await Database.queryFoods();
   List<Map<String, dynamic>> foodMap = [];
   for (var row in foods.rows) {
-    foodMap.add({"Name": row.colAt(0), "Price": row.colAt(1)});
+    foodMap
+        .add({"Id": row.colAt(0), "Name": row.colAt(1), "Price": row.colAt(2)});
   }
   return Response.ok(_encoder.convert(foodMap),
       headers: {"content-type": "application/json"});
+}
+
+Future<Response> handleCreateOrder(Request req) async {
+  var json =
+      (JsonDecoder().convert(await Utf8Decoder().bind(req.read()).join()));
+  String? email = req.headers["email"];
+  String? password = req.headers["password"];
+
+  if (email == null || password == null) {
+    return Response.forbidden(
+        _encoder.convert({"error": "Please provide your credentials"}));
+  } else if (await Database.verifyCredentials(email, password) ==
+      AuthResult.authOk) {
+    Order order = Order(email, json);
+    await Database.insertOrder(order);
+    return Response.ok(null);
+  } else {
+    return Response.forbidden(
+        _encoder.convert({"error": "Invalid credentials"}));
+  }
 }
 
 Future<Response> handleRegister(Request req) async {

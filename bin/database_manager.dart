@@ -1,5 +1,6 @@
 import 'package:mysql_client/mysql_client.dart';
 
+import 'order.dart';
 import 'user_authentication.dart';
 
 class Database {
@@ -42,9 +43,8 @@ class Database {
         "PRIMARY KEY (food_id));");
     await _conn.execute("CREATE TABLE IF NOT EXISTS orders ("
         "order_id INT UNIQUE NOT NULL AUTO_INCREMENT, "
-        "user_id INT UNIQUE NOT NULL, "
+        "user_id INT NOT NULL, "
         "order_date DATETIME, "
-        "order_total DOUBLE NOT NULL, "
         "PRIMARY KEY (order_id), "
         "FOREIGN KEY (user_id) REFERENCES users (user_id));");
     // Many-to-many table
@@ -58,16 +58,14 @@ class Database {
   }
 
   static Future<IResultSet> queryFoods() async {
-    return _conn.execute("SELECT food_name, food_price FROM foods;");
+    return _conn.execute("SELECT food_id, food_name, food_price FROM foods;");
   }
 
   static Future<AuthResult> verifyCredentials(
-      String email, String hashedPassword) async {
-    // NOT SAFE, but the mysql1 package doesn't seems to handle MySql 8 very well
-    // possible substitute could be the mysql_client package.
+      String email, String password) async {
     IResultSet result = await _conn.execute(
         "SELECT email FROM users WHERE email = :email && hashed_password = :password;",
-        {"email": email, "password": hashedPassword});
+        {"email": email, "password": password});
     if (result.rows.isNotEmpty) {
       return AuthResult.authOk;
     } else {
@@ -97,6 +95,31 @@ class Database {
       return AuthResult.emailInUse;
     } else {
       return AuthResult.usernameInUse;
+    }
+  }
+
+  static Future<void> insertOrder(Order order) async {
+    IResultSet lastInsert = await _conn.execute(
+        "INSERT INTO orders (user_id, order_date) VALUES "
+        "((SELECT user_id FROM users WHERE email = :email), CURRENT_TIMESTAMP());",
+        {"email": order.clientEmail});
+    print(lastInsert.lastInsertID);
+    for (var row in order.foodList) {
+      IResultSet foodPrice = await _conn.execute(
+          "SELECT food_price FROM foods "
+          "WHERE food_id = :food_id",
+          {"food_id": row["foodId"]});
+
+      await _conn.execute(
+          "INSERT INTO orders_foods (order_id, food_id, food_qty, food_total) "
+          "VALUES (:order_id, :food_id, :food_qty, :food_total);",
+          {
+            "order_id": lastInsert.lastInsertID,
+            "food_id": row["foodId"],
+            "food_qty": row["quantity"],
+            "food_total":
+                row["quantity"] * num.tryParse(foodPrice.rows.first.colAt(0)!)
+          });
     }
   }
 }
