@@ -10,4 +10,5 @@ void main(List<String> arguments) async {
   if (await Auth.authUserCredentials("marcelo@gmail.com", "password123") ==
       AuthResult.authOk) print("Deu certo");
   server.init(InternetAddress.loopbackIPv4, 4000);
+  print('Server running on localhost');
 }

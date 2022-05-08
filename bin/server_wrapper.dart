@@ -1,24 +1,23 @@
 import 'dart:io';
+
+import 'package:shelf_router/shelf_router.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
+
 import 'endpoint_handler.dart';
 
 class Server {
-  late final HttpServer _server;
+  final _endpointRouter = Router();
 
   Server();
 
   Future<void> init(dynamic address, int port) async {
-    _server = await HttpServer.bind(address, port);
-    _server.listen(endpointsRouter);
+    setEndpoints(_endpointRouter);
+    await shelf_io.serve(_endpointRouter, "localhost", 4000);
   }
 
-  void endpointsRouter(HttpRequest req) {
-    switch (req.uri.path) {
-      case "/api/public/food_list":
-        handleFoodList(req);
-        break;
-      default:
-        handleUnknowEndpoint(req);
-        break;
-    }
+  void setEndpoints(Router router) {
+    router.get("/api/public/foods", handleFoodList);
+    router.post("/api/register", handleRegister);
   }
 }

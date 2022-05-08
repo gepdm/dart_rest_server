@@ -58,7 +58,7 @@ class Database {
   }
 
   static Future<IResultSet> queryFoods() async {
-    return _conn.execute("SELECT * FROM foods;");
+    return _conn.execute("SELECT food_name, food_price FROM foods;");
   }
 
   static Future<AuthResult> verifyCredentials(
