@@ -82,3 +82,33 @@ Future<Response> handleRegister(Request req) async {
         body: _encoder.convert({"error": "Content-Type is not JSON."}));
   }
 }
+
+Future<Response> handleLogin(Request req) async {
+  if (req.headers["content-type"] != null &&
+      req.headers["content-type"]!.startsWith("application/json")) {
+    var json =
+        (JsonDecoder().convert(await Utf8Decoder().bind(req.read()).join()));
+    if (json["email"] == null || json["password"] == null) {
+      return Response.badRequest(
+          body: _encoder
+              .convert({"error": "Please provide registration information"}));
+    } else {
+      switch (await Auth.authUserCredentials(json["email"], json["password"])) {
+        case AuthResult.authOk:
+          return Response.ok(_encoder.convert(
+              {"status": "Login success", "token": "Not yet implemented"}));
+        case AuthResult.wrongCredentials:
+          return Response.forbidden(
+              _encoder.convert({"status": "Wrong credentials"}));
+        default:
+          return Response.forbidden(
+              _encoder.convert({"status": "Unknown error"}));
+      }
+    }
+  } else {
+    return Response.badRequest(
+        body: _encoder.convert({
+      "status": "Content-Type is not JSON, is ${req.headers["content-type"]}"
+    }));
+  }
+}
