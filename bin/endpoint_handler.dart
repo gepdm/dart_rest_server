@@ -30,6 +30,22 @@ Future<Response> handleFoodList(Request req) async {
       headers: {"content-type": "application/json"});
 }
 
+Future<Response> handleFoodImage(Request req, String imageId) async {
+  switch (imageId) {
+    case "1":
+      return Response.found(
+          "https://conteudo.imguol.com.br/c/entretenimento/26/2020/10/06/hambuguer-de-frango---churrasqueadas-1602015731299_v2_450x450.jpg");
+    case "2":
+      return Response.found(
+          "https://cdn.panelinha.com.br/receita/1562096945621-receita.jpg");
+    case "3":
+      return Response.found(
+          "https://cdn.panelinha.com.br/receita/953607600000-Batata-frita-tradicional.jpg");
+    default:
+      return Response.notFound(null);
+  }
+}
+
 Future<Response> handleCreateOrder(Request req) async {
   var json =
       (JsonDecoder().convert(await Utf8Decoder().bind(req.read()).join()));

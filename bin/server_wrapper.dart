@@ -17,6 +17,7 @@ class Server {
 
   void setEndpoints(Router router) {
     router.get("/api/public/foods", handleFoodList);
+    router.get("/api/public/foods/images/<imageId|[0-9]+>", handleFoodImage);
     router.post("/api/register", handleRegister);
     router.post("/api/login", handleLogin);
     router.post("/api/private/order", handleCreateOrder);
